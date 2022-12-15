@@ -268,6 +268,18 @@ fi
 
 set_fan_control "$num_gpus_loop" "1"
 
+### Cambio mío:
+### Se asegura de que primero se empieza por un 30% para
+### evitar ruidos al principio:
+get_temp
+if [ "$cur_t" -lt "55" ]; then
+    cur_spd=30
+    set_speed
+    sleep 10
+fi
+###
+### (Hasta aquí)
+
 if [ "$num_gpus" -eq "1" ] && [ "$num_fans" -eq "1" ]; then
 	prf "Started process for 1 GPU and 1 Fan"
 	fan="$default_fan"
