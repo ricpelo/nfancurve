@@ -271,25 +271,23 @@ fi
 
 set_fan_control "$num_gpus_loop" "1"
 
-### Cambio mío:
-### Se asegura de que primero se empieza por un 30% para
-### evitar ruidos al principio:
-cebado=1
+cebado=0
 fan=0
 while [ "$fan" -le "$num_fans_loop" ]; do
-    if [ "$(get_speed)" -gt "0" ]; then
-        cebado=0
-        break
-    fi
-    fan=$((fan+1))
+	if [ "$(get_speed)" -le "0" ]; then
+		if [ "$cebado" -eq 0 ]; then
+			prf "Iniciando proceso de cebado..."
+		fi
+		cebado=1
+		cur_spd=30
+		set_speed
+	fi
+	fan=$((fan+1))
 done
 if [ "$cebado" -eq "1" ]; then
-    cur_spd=30
-    set_speed
-    sleep 10
+	sleep 10
+	prf "Finalizando proceso de cebado."
 fi
-###
-### (Hasta aquí)
 
 if [ "$num_gpus" -eq "1" ] && [ "$num_fans" -eq "1" ]; then
 	prf "Started process for 1 GPU and 1 Fan"
