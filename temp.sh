@@ -84,6 +84,9 @@ set_fan_control() {
 set_speed() {
 	$gpu_cmd -a [fan:"$fan"]/GPUTargetFanSpeed="$cur_spd" $display
 }
+get_speed() {
+    $gpu_cmd -t -q "[fan:$fan]/GPUCurrentFanSpeed" $display
+}
 finish() {
 	set_fan_control "$num_gpus_loop" "0"
 	prf "Fan control set back to auto mode"; exit 0
@@ -271,8 +274,16 @@ set_fan_control "$num_gpus_loop" "1"
 ### Cambio mío:
 ### Se asegura de que primero se empieza por un 30% para
 ### evitar ruidos al principio:
-get_temp
-if [ "$cur_t" -lt "55" ]; then
+cebado=1
+fan=0
+while [ "$fan" -le "$num_fans_loop" ]; do
+    if [ "$(get_speed)" -gt "0" ]; then
+        cebado=0
+        break
+    fi
+    fan=$((fan+1))
+done
+if [ "$cebado" -eq "1" ]; then
     cur_spd=30
     set_speed
     sleep 10
