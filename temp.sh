@@ -88,6 +88,24 @@ get_speed() {
     $gpu_cmd -t -q "[fan:$fan]/GPUCurrentFanSpeed" $display
 }
 finish() {
+	arr="$fcurve"; n="0"; re_elem; cur_spd="$elem"
+	set_speed
+	i=0
+	while true; do
+		get_temp
+		if [ "$cur_t" -ge "45" ]; then
+			prf "Esperando a que baje la temperatura..."
+		else
+			break
+		fi
+		sleep "$sleep_time"
+		if [ "$i" -ge "5" ]; then
+			arr="$fcurve"; n="1"; re_elem; cur_spd="$elem"
+			set_speed
+		else
+			i=$((i+1))
+		fi
+	done
 	set_fan_control "$num_gpus_loop" "0"
 	prf "Fan control set back to auto mode"; exit 0
 }; trap " finish" INT HUP QUIT ABRT ALRM TERM
