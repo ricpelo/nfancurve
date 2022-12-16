@@ -90,7 +90,7 @@ get_speed() {
 finish() {
 	set_fan_control "$num_gpus_loop" "0"
 	prf "Fan control set back to auto mode"; exit 0
-}; trap " finish" INT
+}; trap " finish" INT HUP QUIT ABRT ALRM TERM
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 echo_info() {
 	e=" t=$cur_t ot=$ot td=$tdiff s=$sleep_time gpu=$gpu fan=$fan cd=$chd"
