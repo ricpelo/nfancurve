@@ -272,6 +272,7 @@ fi
 set_fan_control "$num_gpus_loop" "1"
 
 cebado=0
+arr="$fcurve"; n="0"; re_elem; cur_spd="$elem"
 fan=0
 while [ "$fan" -le "$num_fans_loop" ]; do
 	if [ "$(get_speed)" -le "0" ]; then
@@ -279,7 +280,6 @@ while [ "$fan" -le "$num_fans_loop" ]; do
 			prf "Iniciando proceso de cebado..."
 		fi
 		cebado=1
-		cur_spd=30
 		set_speed
 	fi
 	fan=$((fan+1))
@@ -287,6 +287,7 @@ done
 if [ "$cebado" -eq "1" ]; then
 	sleep 10
 	prf "Finalizando proceso de cebado."
+	prf ""
 fi
 
 if [ "$num_gpus" -eq "1" ] && [ "$num_fans" -eq "1" ]; then
