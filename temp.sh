@@ -94,11 +94,10 @@ finish() {
 		if [ "$cur_t" -ge "45" ]; then
 			prf "Esperando a que baje la temperatura..."
 			if [ "$i" -eq "0" ]; then
-				arr="$fcurve"; n="1"; re_elem; cur_spd="$elem"
-				if [ "$(get_speed)" -ge "$cur_spd" ]; then
-					arr="$fcurve"; n="1"; re_elem; cur_spd="$elem"
+				if [ "$(get_speed)" -ge "50" ]; then
+					cur_spd="50"
 				else
-					arr="$fcurve"; n="0"; re_elem; cur_spd="$elem"
+					cur_spd="35"
 				fi
 				set_speed
 			fi
@@ -107,7 +106,7 @@ finish() {
 		fi
 		sleep "$sleep_time"
 		if [ "$i" -ge "10" ]; then
-			arr="$fcurve"; n="1"; re_elem; cur_spd="$elem"
+			cur_spd="50"
 			set_speed
 		else
 			i=$((i+1))
