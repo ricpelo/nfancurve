@@ -209,11 +209,11 @@ if ! [ "$size1" -eq "$size2" ]; then
 	prf "fcurve2 and tcurve2 don't match up!"; exit 1
 fi
 arr="$tcurve"; n="0"; re_elem
-if [ "$min_t" -ge "$elem" ]; then
+if [ "$min_t" -gt "$elem" ]; then
 	prf "min_t is greater than the first value in the tcurve!"; exit 1
 fi
 arr="$tcurve2"; n="0"; re_elem
-if [ "$min_t2" -ge "$elem" ]; then
+if [ "$min_t2" -gt "$elem" ]; then
 	prf "min_t2 is greater than the first value in the tcurve2!"; exit 1
 fi
 
@@ -271,30 +271,30 @@ fi
 
 set_fan_control "$num_gpus_loop" "1"
 
-cebado=0
-arr="$fcurve"; n="0"; re_elem; cur_spd="$elem"
-fan=0
-while [ "$fan" -le "$num_fans_loop" ]; do
-	if [ "$(get_speed)" -le "0" ]; then
+hacer_cebado() {
+	cebado=0
+	get_temp
+	if [ "$(get_speed)" -le "0" -a "$cur_t" -ge "$min_t" ]; then
 		if [ "$cebado" -eq 0 ]; then
 			prf "Iniciando proceso de cebado..."
 		fi
 		cebado=1
+		arr="$fcurve"; n="0"; re_elem; cur_spd="$elem"
 		set_speed
 	fi
-	fan=$((fan+1))
-done
-if [ "$cebado" -eq "1" ]; then
-	sleep 10
-	prf "Finalizando proceso de cebado."
-	prf ""
-fi
+	if [ "$cebado" -eq "1" ]; then
+		sleep 10
+		prf "Finalizando proceso de cebado."
+		prf ""
+	fi
+}
 
 if [ "$num_gpus" -eq "1" ] && [ "$num_fans" -eq "1" ]; then
 	prf "Started process for 1 GPU and 1 Fan"
 	fan="$default_fan"
 	set_stuff
 	while true; do
+		hacer_cebado
 		arr="$old_t"; n="$fan"; re_elem; ot="$elem"
 		arr="$old_s"; n="$fan"; re_elem; cur_spd="$elem"
 		loop_cmds
@@ -306,6 +306,7 @@ else
 		fan=0
 		while [ "$fan" -le "$num_fans_loop" ]; do
 			set_stuff
+			hacer_cebado
 			arr="$old_t"; n="$fan"; re_elem; ot="$elem"
 			arr="$old_s"; n="$fan"; re_elem; cur_spd="$elem"
 			loop_cmds
