@@ -88,18 +88,25 @@ get_speed() {
     $gpu_cmd -t -q "[fan:$fan]/GPUCurrentFanSpeed" $display
 }
 finish() {
-	arr="$fcurve"; n="0"; re_elem; cur_spd="$elem"
-	set_speed
 	i=0
 	while true; do
 		get_temp
 		if [ "$cur_t" -ge "45" ]; then
 			prf "Esperando a que baje la temperatura..."
+			if [ "$i" -eq "0" ]; then
+				arr="$fcurve"; n="1"; re_elem; cur_spd="$elem"
+				if [ "$(get_speed)" -ge "$cur_spd" ]; then
+					arr="$fcurve"; n="1"; re_elem; cur_spd="$elem"
+				else
+					arr="$fcurve"; n="0"; re_elem; cur_spd="$elem"
+				fi
+				set_speed
+			fi
 		else
 			break
 		fi
 		sleep "$sleep_time"
-		if [ "$i" -ge "5" ]; then
+		if [ "$i" -ge "10" ]; then
 			arr="$fcurve"; n="1"; re_elem; cur_spd="$elem"
 			set_speed
 		else
