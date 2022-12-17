@@ -112,12 +112,11 @@ finish() {
 		if [ "$cur_t" -ge "45" ]; then
 			prf "Esperando a que baje la temperatura..."
 			if [ "$i" -eq "0" ]; then
-				if [ "$(get_speed)" -ge "50" ]; then
-					# Si ya gira a más de 50%, probamos con 50%
-					cur_spd="50"
-				else
+				# Si ya gira a más de 50%, probamos con 50%
+				arr="$fcurve"; n="1"; re_elem; cur_spd="$elem"
+				if [ "$(get_speed)" -lt "$cur_spd" ]; then
 					# Si no, probamos con 30%
-					cur_spd="30"
+					arr="$fcurve"; n="0"; re_elem; cur_spd="$elem"
 				fi
 				set_speed
 			fi
@@ -127,8 +126,8 @@ finish() {
 		sleep "$sleep_time"
 		# Si después de 10 intentos, la temperatura sigue alta
 		if [ "$i" -ge "10" ]; then
-			# Probamos al 50%
-			cur_spd="50"
+			# Probamos al 55%
+			arr="$fcurve"; n="1"; re_elem; cur_spd="$elem"
 			set_speed
 		else
 			i=$((i+1))
