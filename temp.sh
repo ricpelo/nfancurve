@@ -106,8 +106,8 @@ finish() {
 	i=0
 	while true; do
 		get_temp
-		# Bajamos la temperatura a <= 45º
-		if [ "$cur_t" -gt "45" ]; then
+		# Bajamos la temperatura a <= 46º
+		if [ "$cur_t" -gt "46" ]; then
 			prf "Esperando a que baje la temperatura..."
 			if [ "$i" -eq "0" ]; then
 				# Si ya gira a más de 50%, probamos con 50%
@@ -269,20 +269,20 @@ arr="$fcurve2"; arr_size; fcurve_len2="$((arr_len-1))"
 
 # Get the system's GPU configuration
 num_fans=$(get_query "fans"); num_fans="${num_fans%* Fan on*}"
+num_fans="$((num_fans))"
 if [ -z "$num_fans" ]; then
 	prf "No Fans detected"; exit 1
 elif [ "${#num_fans}" -gt "2" ]; then
 	num_fans="${num_fans%* Fans on*}"
-	num_fans="$((num_fans))"
 	num_fans_loop="$((num_fans-1))"
 fi
 prf "Number of Fans detected: $num_fans"
 num_gpus=$(get_query "gpus"); num_gpus="${num_gpus%* GPU on*}"
+num_gpus=$((num_gpus))
 if [ -z "$num_gpus" ]; then
 	prf "No GPUs detected"; exit 1
 elif [ "${#num_gpus}" -gt "2" ]; then
 	num_gpus="${num_gpus%* GPUs on*}"
-	num_gpus="$((num_gpus))"
 	num_gpus_loop="$((num_gpus-1))"
 fi
 prf "Number of GPUs detected: $num_gpus"
