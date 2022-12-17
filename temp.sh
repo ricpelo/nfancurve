@@ -132,6 +132,7 @@ finish() {
 		fi
 	done
 	set_fan_control "$num_gpus_loop" "0"
+	notify-send -u critical "Fan control set back to auto mode"
 	prf "Fan control set back to auto mode"; exit 0
 }; trap " finish" INT HUP QUIT ABRT ALRM TERM
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
