@@ -88,28 +88,26 @@ get_speed() {
     $gpu_cmd -t -q "[fan:$fan]/GPUCurrentFanSpeed" $display
 }
 cebador() {
-	cebado=0
-	get_temp
-	if [ "$(get_speed)" -le "0" -a "$cur_t" -ge "$min_t" ]; then
-		if [ "$cebado" -eq 0 ]; then
-			prf "Iniciando proceso de cebado..."
-		fi
-		cebado=1
-		arr="$fcurve"; n="0"; re_elem; cur_spd="$elem"
+	arr="$fcurve"; n="0"; re_elem; ceb_spd="$elem"
+	if [ "$(get_speed)" -le "0" -a "$cur_spd" -gt "0" -a "$cur_spd" -gt "$ceb_spd" ]; then
+		prf "Iniciando proceso de cebado..."
+		old_spd="$cur_spd"
+		cur_spd="$ceb_spd"
 		set_speed
-	fi
-	if [ "$cebado" -eq "1" ]; then
-		sleep 10
-		prf "Finalizando proceso de cebado."
-		prf ""
+		cur_spd="$old_spd"
+		while [ "$(get_speed)" -lt "$ceb_spd" ]; do
+			prf "Finalizando proceso de cebado..."
+			prf ""
+			sleep 10
+		done
 	fi
 }
 finish() {
 	i=0
 	while true; do
 		get_temp
-		# Bajamos la temperatura a menos de 45º
-		if [ "$cur_t" -ge "45" ]; then
+		# Bajamos la temperatura a <= 45º
+		if [ "$cur_t" -gt "45" ]; then
 			prf "Esperando a que baje la temperatura..."
 			if [ "$i" -eq "0" ]; then
 				# Si ya gira a más de 50%, probamos con 50%
@@ -189,6 +187,7 @@ loop_cmds() {
 			fi
 			if [ "$new_spd" -ne "$cur_spd" ]; then
 				cur_spd="$new_spd"
+				cebador
 				set_speed
 				i=0
 				tmp="$old_s"; old_s=""
@@ -274,6 +273,7 @@ if [ -z "$num_fans" ]; then
 	prf "No Fans detected"; exit 1
 elif [ "${#num_fans}" -gt "2" ]; then
 	num_fans="${num_fans%* Fans on*}"
+	num_fans="$((num_fans))"
 	num_fans_loop="$((num_fans-1))"
 fi
 prf "Number of Fans detected: $num_fans"
@@ -282,6 +282,7 @@ if [ -z "$num_gpus" ]; then
 	prf "No GPUs detected"; exit 1
 elif [ "${#num_gpus}" -gt "2" ]; then
 	num_gpus="${num_gpus%* GPUs on*}"
+	num_gpus="$((num_gpus))"
 	num_gpus_loop="$((num_gpus-1))"
 fi
 prf "Number of GPUs detected: $num_gpus"
@@ -321,7 +322,6 @@ if [ "$num_gpus" -eq "1" ] && [ "$num_fans" -eq "1" ]; then
 	fan="$default_fan"
 	set_stuff
 	while true; do
-		cebador
 		arr="$old_t"; n="$fan"; re_elem; ot="$elem"
 		arr="$old_s"; n="$fan"; re_elem; cur_spd="$elem"
 		loop_cmds
@@ -333,7 +333,6 @@ else
 		fan=0
 		while [ "$fan" -le "$num_fans_loop" ]; do
 			set_stuff
-			cebador
 			arr="$old_t"; n="$fan"; re_elem; ot="$elem"
 			arr="$old_s"; n="$fan"; re_elem; cur_spd="$elem"
 			loop_cmds
