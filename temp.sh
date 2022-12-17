@@ -95,7 +95,7 @@ cebador() {
 			prf "Iniciando proceso de cebado..."
 		fi
 		cebado=1
-		cur_spd="30"
+		arr="$fcurve"; n="0"; re_elem; cur_spd="$elem"
 		set_speed
 	fi
 	if [ "$cebado" -eq "1" ]; then
