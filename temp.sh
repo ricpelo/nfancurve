@@ -72,6 +72,7 @@ kill_already_running() {
 # DEPENDS: NVIDIA-SETTINGS
 get_temp() {
 	cur_t="$($gpu_cmd -q=[gpu:"$gpu"]/GPUCoreTemp -t $display)"
+    return $?
 }
 get_query() {
 	prf "$($gpu_cmd -q "$1" $display)"
@@ -106,7 +107,7 @@ cebador() {
 finish() {
 	i=0
 	while true; do
-		get_temp
+		get_temp || exit
 		# Bajamos la temperatura a <= 46º
 		if [ "$cur_t" -gt "46" ]; then
 			prf "Esperando a que baje la temperatura..."
