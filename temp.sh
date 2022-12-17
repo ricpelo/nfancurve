@@ -87,16 +87,36 @@ set_speed() {
 get_speed() {
     $gpu_cmd -t -q "[fan:$fan]/GPUCurrentFanSpeed" $display
 }
+cebador() {
+	cebado=0
+	get_temp
+	if [ "$(get_speed)" -le "0" -a "$cur_t" -ge "$min_t" ]; then
+		if [ "$cebado" -eq 0 ]; then
+			prf "Iniciando proceso de cebado..."
+		fi
+		cebado=1
+		cur_spd="30"
+		set_speed
+	fi
+	if [ "$cebado" -eq "1" ]; then
+		sleep 10
+		prf "Finalizando proceso de cebado."
+		prf ""
+	fi
+}
 finish() {
 	i=0
 	while true; do
 		get_temp
+		# Bajamos la temperatura a menos de 45º
 		if [ "$cur_t" -ge "45" ]; then
 			prf "Esperando a que baje la temperatura..."
 			if [ "$i" -eq "0" ]; then
 				if [ "$(get_speed)" -ge "50" ]; then
+					# Si ya gira a más de 50%, probamos con 50%
 					cur_spd="50"
 				else
+					# Si no, probamos con 35%
 					cur_spd="35"
 				fi
 				set_speed
@@ -105,7 +125,9 @@ finish() {
 			break
 		fi
 		sleep "$sleep_time"
+		# Si después de 10 intentos, la temperatura sigue alta
 		if [ "$i" -ge "10" ]; then
+			# Probamos al 50%
 			cur_spd="50"
 			set_speed
 		else
@@ -295,30 +317,12 @@ fi
 
 set_fan_control "$num_gpus_loop" "1"
 
-hacer_cebado() {
-	cebado=0
-	get_temp
-	if [ "$(get_speed)" -le "0" -a "$cur_t" -ge "$min_t" ]; then
-		if [ "$cebado" -eq 0 ]; then
-			prf "Iniciando proceso de cebado..."
-		fi
-		cebado=1
-		arr="$fcurve"; n="0"; re_elem; cur_spd="$elem"
-		set_speed
-	fi
-	if [ "$cebado" -eq "1" ]; then
-		sleep 10
-		prf "Finalizando proceso de cebado."
-		prf ""
-	fi
-}
-
 if [ "$num_gpus" -eq "1" ] && [ "$num_fans" -eq "1" ]; then
 	prf "Started process for 1 GPU and 1 Fan"
 	fan="$default_fan"
 	set_stuff
 	while true; do
-		hacer_cebado
+		cebador
 		arr="$old_t"; n="$fan"; re_elem; ot="$elem"
 		arr="$old_s"; n="$fan"; re_elem; cur_spd="$elem"
 		loop_cmds
@@ -330,7 +334,7 @@ else
 		fan=0
 		while [ "$fan" -le "$num_fans_loop" ]; do
 			set_stuff
-			hacer_cebado
+			cebador
 			arr="$old_t"; n="$fan"; re_elem; ot="$elem"
 			arr="$old_s"; n="$fan"; re_elem; cur_spd="$elem"
 			loop_cmds
