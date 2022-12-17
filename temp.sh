@@ -62,10 +62,12 @@ prf "
 # DEPENDS: PROCPS
 kill_already_running() {
 	tmp="$(pgrep -c temp.sh)"
-	if [ "$tmp" -gt "1" ]; then
+	while [ "$tmp" -gt "1" ]; do
 		process_pid="$(pgrep -o temp.sh)"
 		kill -USR1 "$process_pid"; prf "Killed $process_pid"
-	fi
+		sleep "$sleep_time"
+		tmp="$(pgrep -c temp.sh)"
+	done
 }
 # DEPENDS: NVIDIA-SETTINGS
 get_temp() {
