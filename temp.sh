@@ -116,8 +116,8 @@ finish() {
 					# Si ya gira a más de 50%, probamos con 50%
 					cur_spd="50"
 				else
-					# Si no, probamos con 35%
-					cur_spd="35"
+					# Si no, probamos con 30%
+					cur_spd="30"
 				fi
 				set_speed
 			fi
