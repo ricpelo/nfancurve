@@ -64,7 +64,7 @@ kill_already_running() {
 	tmp="$(pgrep -c temp.sh)"
 	if [ "$tmp" -gt "1" ]; then
 		process_pid="$(pgrep -o temp.sh)"
-		kill "$process_pid"; prf "Killed $process_pid"
+		kill -USR1 "$process_pid"; prf "Killed $process_pid"
 	fi
 }
 # DEPENDS: NVIDIA-SETTINGS
@@ -133,7 +133,12 @@ finish() {
 	set_fan_control "$num_gpus_loop" "0"
 	notify-send -u critical "Fan control set back to auto mode"
 	prf "Fan control set back to auto mode"; exit 0
-}; trap " finish" INT HUP QUIT ABRT ALRM TERM
+}; trap "finish" INT HUP QUIT ABRT ALRM TERM
+finish_usr() {
+	notify-send -u critical "Proceso temp.sh detenido"
+	prf "Proceso temp.sh detenido"
+	exit 0;
+}; trap "finish_usr" USR1
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 echo_info() {
 	e=" t=$cur_t ot=$ot td=$tdiff s=$sleep_time gpu=$gpu fan=$fan cd=$chd"
